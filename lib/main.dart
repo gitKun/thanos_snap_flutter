@@ -48,21 +48,20 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Padding(padding: EdgeInsets.only(top: 80)),
 
-          Padding(padding: EdgeInsets.only(top: 20)),
           Container(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'images/baidu.png',
+                  'images/google.png',
                   height: 40,
                   fit: BoxFit.fitHeight,
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
-                    '灭霸需要你消失!',
+                    '逃不过真香定律!',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -72,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
+          Padding(padding: EdgeInsets.only(top: 20)),
           DustEffectContainer(
             dustController: dustController,
             child: Container(
@@ -98,14 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          Padding(padding: EdgeInsets.only(top: 20)),
-          Center(
-            child: Image.asset(
-              'images/baidu.png',
-              height: 40,
-              fit: BoxFit.fitHeight,
-            ),
-          ),
         ],
       ),
       floatingActionButton: ThanosGauntlet(
@@ -113,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (action == ThanosGauntletAction.snap) {
             dustController.showDust();
           }
-          if(action == ThanosGauntletAction.reverse) {
+          if (action == ThanosGauntletAction.reverse) {
             dustController.reverseDustAnimation();
           }
         },
