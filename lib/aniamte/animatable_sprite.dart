@@ -14,8 +14,7 @@ class AnimatableSprite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 28,
-      height: 28,
+
       child: CustomPaint(
         painter: _SpritesPainter(
           img,

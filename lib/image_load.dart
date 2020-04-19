@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
@@ -23,4 +24,25 @@ class ImageLoader {
     stream.addListener(listener); //添加监听
     return completer.future; //返回
   }
+
+
+  //通过[Uint8List]获取图片,默认宽高[width][height]
+  Future<ui.Image> loadImageByUint8List(
+      Uint8List list, {
+        int width,
+        int height,
+      }) async {
+    /*
+    ui.Codec codec = await ui.instantiateImageCodec(list,
+        targetWidth: width, targetHeight: height);
+    ui.FrameInfo frame = await codec.getNextFrame();
+    return frame.image;
+     */
+    final Completer<ui.Image> completer = new Completer();
+    ui.decodeImageFromList(list, (ui.Image img) {
+      return completer.complete(img);
+    });
+    return completer.future;
+  }
+
 }

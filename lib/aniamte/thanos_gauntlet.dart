@@ -5,7 +5,18 @@ import 'dart:ui' as ui;
 
 import 'package:thanos_snap_flutter/image_load.dart';
 
+enum ThanosGauntletAction {
+  snap,
+  reverse,
+}
+
 class ThanosGauntlet extends StatefulWidget {
+  final void Function(ThanosGauntletAction action) onPressed;
+  final void Function(ThanosGauntletAction action) onAnimationComplete;
+
+  ThanosGauntlet(
+      {@required this.onPressed, @required this.onAnimationComplete});
+
   @override
   _ThanosGauntletState createState() => _ThanosGauntletState();
 }
@@ -51,37 +62,16 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
   @override
   Widget build(BuildContext context) {
     if (snapImg != null && reverseImg != null) {
-      return Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image(
-                image: AssetImage('images/baidu.png'),
-              ),
-              Text(
-                '灭霸需要你消失！',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+      return GestureDetector(
+        child: Container(
+          height: 40,
+          width: 40,
+          child: AnimatableSprite(
+            img: !showSnap ? snapImg : reverseImg,
+            showIndex: !showSnap ? snapAnimation.value : reverseAnimation.value,
           ),
-          Padding(padding: EdgeInsets.only(top: 20)),
-          GestureDetector(
-            child: Container(
-              height: 80,
-              width: 80,
-              child: AnimatableSprite(
-                img: !showSnap ? snapImg : reverseImg,
-                showIndex:
-                    !showSnap ? snapAnimation.value : reverseAnimation.value,
-              ),
-            ),
-            onTap: _shwoAnimation,
-          )
-        ],
+        ),
+        onTap: _showAnimation,
       );
     } else {
       return Container();
@@ -151,10 +141,13 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
 
     if (status == AnimationStatus.completed) {
       _isShowingAnimation = false;
+      widget.onAnimationComplete(
+        !showSnap ? ThanosGauntletAction.snap : ThanosGauntletAction.reverse,
+      );
     }
   }
 
-  _shwoAnimation() {
+  _showAnimation() {
     if (_isShowingAnimation) {
       return;
     }
@@ -167,6 +160,10 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
       reverseController.forward();
     }
     showSnap = !showSnap;
+
+    widget.onPressed(
+      !showSnap ? ThanosGauntletAction.snap : ThanosGauntletAction.reverse,
+    );
 
     _player.play(
       !showSnap ? 'thanos_snap_sound.mp3' : 'thanos_reverse_sound.mp3',
