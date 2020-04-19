@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thanos_snap_flutter/aniamte/dust_controller.dart';
 import 'package:thanos_snap_flutter/aniamte/dust_effect_container.dart';
+import 'package:thanos_snap_flutter/test_dust_draw.dart';
 import 'aniamte/thanos_gauntlet.dart';
 
 void main() => runApp(MyApp());
@@ -53,14 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Padding(padding: EdgeInsets.only(top: 20)),
-          Center(
-            child: Image.asset(
-              'images/baidu.png',
-              height: 40,
-              fit: BoxFit.fitHeight,
-            ),
-          ),
-          Padding(padding: EdgeInsets.only(top: 20)),
           Container(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,6 +103,15 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+          Padding(padding: EdgeInsets.only(top: 20)),
+          Center(
+            child: Image.asset(
+              'images/baidu.png',
+              height: 40,
+              fit: BoxFit.fitHeight,
+            ),
+          ),
+          TestDustDrawDemo(),
         ],
       ),
       floatingActionButton: ThanosGauntlet(
@@ -117,10 +119,16 @@ class _MyHomePageState extends State<MyHomePage> {
           if (action == ThanosGauntletAction.snap) {
             dustController.showDust();
           }
+          if(action == ThanosGauntletAction.reverse) {
+
+          }
         },
         onAnimationComplete: (action) {
           if (action == ThanosGauntletAction.snap) {
-            //dustController.startDustAnimation();
+            dustController.startDustAnimation();
+          }
+          if (action == ThanosGauntletAction.reverse) {
+            dustController.hiddenDust();
           }
         },
       ),

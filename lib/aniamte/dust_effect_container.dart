@@ -71,7 +71,7 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     try {
       RenderRepaintBoundary boundary =
           rootWidgetKey.currentContext.findRenderObject();
-      this.uiImage = await boundary.toImage();
+      this.uiImage = await boundary.toImage(pixelRatio: 2);
       return;
     } catch (e) {
       print(e);
@@ -121,8 +121,8 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     print('width is $width; height is $height');
 
     return Container(
-      height: _image.height.toDouble(),
-      width: width,
+      height: _image.height.toDouble() / 2,
+      width: _image.width.toDouble() / 2,
       child: DustEffectDraw(
         animationController: _controller,
         image: _image,

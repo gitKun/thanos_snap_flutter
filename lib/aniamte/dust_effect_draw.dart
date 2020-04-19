@@ -11,12 +11,17 @@ class DustEffectDraw extends StatefulWidget {
   final AnimationController animationController;
 
   final ui.Image image;
+  final bool rebuildHeader;
 
   const DustEffectDraw({
     Key key,
     @required this.animationController,
     @required this.image,
-  }) : super(key: key);
+    this.rebuildHeader = true,
+  }) : assert(
+  animationController != null,
+  'A non-null animationController must be provided to a DustEffectDraw widget.',
+  ), super(key: key);
 
   @override
   _DustEffectDrawState createState() => _DustEffectDrawState();
@@ -33,6 +38,7 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     super.initState();
     _image = widget.image;
     loadImage();
+    _initAnimation();
   }
 
   @override
@@ -40,21 +46,18 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     super.dispose();
   }
 
-  int randomInteger({int low = 0, int up = 10}) {
-    return low + Random().nextInt(up - low);
-  }
-
   static int imageCount = 32;
 
   loadImage() async {
     ui.Image originImg = _image;
-    _initAnimation();
     _initImages(originImg);
   }
 
   /// 拆解图像
   _initImages(ui.Image image) async {
     ui.Image originImg = image;
+    int imageHeight = originImg.height;
+    int imageWidth = originImg.width;
     ByteData byteData = await originImg.toByteData();
     Uint8List originList = new Uint8List.view(byteData.buffer);
     int length = originList.length;
@@ -63,12 +66,16 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     for (int i = 0; i < imageCount; i++) {
       framePixels[i] = Uint8List(length);
     }
+    print('Load _initImages ____#');
     // 遍历 originList
     for (int idx = 0; idx < length; idx++) {
       if (idx % 4 == 0 && idx > 3) {
+        double column = (idx / 4)  % imageWidth;
         // 每个循环2次
-        for (int i = 0; i < 2; i++) {
-          Uint8List tmp = framePixels[randomInteger(low: 0, up: imageCount)];
+        for (int i = 0; i < 1; i++) {
+          double factor = Random().nextDouble() + 2 * (column / imageWidth);
+          int index = (imageCount * (factor / 3)).floor();
+          Uint8List tmp = framePixels[index];
           tmp[idx - 1] = originList[idx - 1];
           tmp[idx - 2] = originList[idx - 2];
           tmp[idx - 3] = originList[idx - 3];
@@ -78,12 +85,19 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     }
     List<DustEffectModel> imageList = List();
     for (var e in framePixels) {
-      Bitmap bitmap = Bitmap.fromHeadless(
-        originImg.width,
-        originImg.height,
-        e,
-      );
-      ui.Image outputImage = await bitmap.buildImage();
+
+      ui.Image outputImage;
+
+      if(widget.rebuildHeader) {
+        Bitmap bitmap = Bitmap.fromHeadless(
+          originImg.width,
+          originImg.height,
+          e,
+        );
+        outputImage = await bitmap.buildImage();
+      } else {
+        outputImage = await ImageLoader.loader.loadImageByUint8List(e);
+      }
       DustEffectModel model = DustEffectModel(outputImage);
       imageList.add(model);
     }
@@ -142,7 +156,13 @@ class _DustEffectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Rect rect = Offset(0, 0) & size;
+    int  total = dustList.length;
     for (var model in dustList) {
+      int index = dustList.indexOf(model);
+      double realStep = step;
+      if((index / total) > 0.125 + step) {
+        realStep = 0;
+      }
       ui.Image image = model.image;
       Rect src = Rect.fromLTRB(
         0,
@@ -150,7 +170,7 @@ class _DustEffectPainter extends CustomPainter {
         image.width.toDouble(),
         image.height.toDouble(),
       );
-      double rotation = model.rotation * step;
+      double rotation = model.rotation * realStep;
       Point translate = model.translate;
       canvas.save();
       // 计算画布中心轨迹圆半径
@@ -166,8 +186,8 @@ class _DustEffectPainter extends CustomPainter {
       double xAngle = rotation;
       // 计算旋转后的画布中心点坐标
       Point px = Point(
-        r * cos(xAngle + startAngle) - translate.x * step,
-        r * sin(xAngle + startAngle) - translate.y * step,
+        r * cos(xAngle + startAngle) - translate.x * realStep,
+        r * sin(xAngle + startAngle) - translate.y * realStep,
       );
       // 先平移画布
       canvas.translate((p0.x - px.x) / 2, (p0.y - px.y) / 2);
