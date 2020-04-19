@@ -4,9 +4,9 @@ import 'package:thanos_snap_flutter/aniamte/dust_effect_container.dart';
 import 'package:thanos_snap_flutter/test_dust_draw.dart';
 import 'aniamte/thanos_gauntlet.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(ThanosSnap());
 
-class MyApp extends StatelessWidget {
+class ThanosSnap extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: '灭霸😘'),
     );
   }
 }
@@ -46,13 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView(
         children: <Widget>[
-          Padding(padding: EdgeInsets.only(top: 20)),
-          Center(
-            child: Text(
-              '灭霸🤟',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ),
+          Padding(padding: EdgeInsets.only(top: 80)),
+
           Padding(padding: EdgeInsets.only(top: 20)),
           Container(
             child: Row(
@@ -111,7 +106,6 @@ class _MyHomePageState extends State<MyHomePage> {
               fit: BoxFit.fitHeight,
             ),
           ),
-          TestDustDrawDemo(),
         ],
       ),
       floatingActionButton: ThanosGauntlet(
@@ -120,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
             dustController.showDust();
           }
           if(action == ThanosGauntletAction.reverse) {
-
+            dustController.reverseDustAnimation();
           }
         },
         onAnimationComplete: (action) {

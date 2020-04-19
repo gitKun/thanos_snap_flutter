@@ -56,12 +56,20 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     }
     setState(() {
       _showDust = widget.dustController.value.showDustImage;
+      if(!_showDust) {
+        _controller.reset();
+      }
     });
 
-    if (widget.dustController.value.showDustAnimation && _realShowDust) {
+    if (widget.dustController.value.animationToSnap && _realShowDust) {
       setState(() {
         _controller.reset();
         _controller.forward();
+      });
+    } else if(!widget.dustController.value.animationToSnap &&
+        _realShowDust) {
+      setState(() {
+        _controller.reverse();
       });
     }
   }
@@ -76,13 +84,12 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     } catch (e) {
       print(e);
     }
-    return;
   }
 
   set uiImage(ui.Image newImage) {
     setState(() {
       _image = newImage;
-      if (widget.dustController.value.showDustAnimation && _realShowDust) {
+      if (widget.dustController.value.animationToSnap && _realShowDust) {
         _controller.reset();
         _controller.forward();
       }
@@ -93,18 +100,20 @@ class _DustEffectContainerState extends State<DustEffectContainer>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedCrossFade(
-      firstChild: RepaintBoundary(
-        key: rootWidgetKey,
-        child: Opacity(
-          opacity: _realShowDust ? 0 : 1,
-          child: widget.child,
-        ),
+    return Container(
+      child: Stack(
+        children: [
+
+          Opacity(
+            opacity: _realShowDust ? 0 : 1,
+            child: RepaintBoundary(
+              key: rootWidgetKey,
+              child: widget.child,
+            ),
+          ),
+          _dustEffectWidget(context),
+        ],
       ),
-      secondChild: _dustEffectWidget(context),
-      crossFadeState:
-          !_realShowDust ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      duration: Duration(milliseconds: 250),
     );
   }
 
@@ -112,14 +121,11 @@ class _DustEffectContainerState extends State<DustEffectContainer>
 
   Widget _dustEffectWidget(BuildContext context) {
     if (!_realShowDust) {
-      return Container();
+      return Container(
+        color: Colors.red,
+        height: 0,
+      );
     }
-
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
-    print('width is $width; height is $height');
-
     return Container(
       height: _image.height.toDouble() / 2,
       width: _image.width.toDouble() / 2,

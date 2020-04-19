@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:thanos_snap_flutter/image_load.dart';
+import 'package:thanos_snap_flutter/bitmap.dart';
 import 'dust_effect_model.dart';
 
 class DustEffectDraw extends StatefulWidget {
@@ -18,10 +18,11 @@ class DustEffectDraw extends StatefulWidget {
     @required this.animationController,
     @required this.image,
     this.rebuildHeader = true,
-  }) : assert(
-  animationController != null,
-  'A non-null animationController must be provided to a DustEffectDraw widget.',
-  ), super(key: key);
+  })  : assert(
+          animationController != null,
+          'A non-null animationController must be provided to a DustEffectDraw widget.',
+        ),
+        super(key: key);
 
   @override
   _DustEffectDrawState createState() => _DustEffectDrawState();
@@ -43,6 +44,8 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
 
   @override
   dispose() {
+    _animation.removeListener(_handleAnimationChange);
+    _animation.removeStatusListener(_handleAnimationStatusChange);
     super.dispose();
   }
 
@@ -66,11 +69,10 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     for (int i = 0; i < imageCount; i++) {
       framePixels[i] = Uint8List(length);
     }
-    print('Load _initImages ____#');
     // 遍历 originList
     for (int idx = 0; idx < length; idx++) {
       if (idx % 4 == 0 && idx > 3) {
-        double column = (idx / 4)  % imageWidth;
+        double column = (idx / 4) % imageWidth;
         // 每个循环2次
         for (int i = 0; i < 1; i++) {
           double factor = Random().nextDouble() + 2 * (column / imageWidth);
@@ -85,10 +87,8 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     }
     List<DustEffectModel> imageList = List();
     for (var e in framePixels) {
-
       ui.Image outputImage;
-
-      if(widget.rebuildHeader) {
+      if (widget.rebuildHeader) {
         Bitmap bitmap = Bitmap.fromHeadless(
           originImg.width,
           originImg.height,
@@ -109,40 +109,68 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
   /// 初始化动画
   _initAnimation() {
     _animation = IntTween(begin: 0, end: 10).animate(widget.animationController)
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          // notify completed
-        } else if (status == AnimationStatus.dismissed) {
-          // // notify dismissed
-        }
-      });
+      ..addListener(_handleAnimationChange)
+      ..addStatusListener(_handleAnimationStatusChange);
+  }
+
+  _handleAnimationChange() {
+    setState(() {});
+  }
+
+  _handleAnimationStatusChange(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      // notify completed
+    } else if (status == AnimationStatus.dismissed) {
+      // // notify dismissed
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (dustModelList != null) {
-      return Container(
-        height: 40,
-        width: 40,
-        child: Opacity(
-          opacity: 1 - _animation.value / 10.0,
-          child: CustomPaint(
-            painter: _DustEffectPainter(
-              dustList: dustModelList,
-              step: _animation.value / 10.0,
-            ),
+      return Opacity(
+        opacity: 1 - _animation.value / 10.0,
+        child: CustomPaint(
+          painter: _DustEffectPainter(
+            dustList: dustModelList,
+            step: _animation.value / 10.0,
           ),
         ),
       );
     } else {
-      return Container();
+      return CustomPaint(
+        painter: _DustEffectPlaceholderPainter(placeholderImage: _image),
+      );
     }
   }
 }
 
+class _DustEffectPlaceholderPainter extends CustomPainter {
+  Paint mPaint;
+  ui.Image placeholderImage;
+  _DustEffectPlaceholderPainter({@required this.placeholderImage}) {
+    mPaint = Paint();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect rect = Offset(0, 0) & size;
+    ui.Image image = placeholderImage;
+    Rect src = Rect.fromLTRB(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+    canvas.drawImageRect(image, src, rect, mPaint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+
+}
 
 class _DustEffectPainter extends CustomPainter {
   Paint mPaint;
@@ -156,11 +184,11 @@ class _DustEffectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Rect rect = Offset(0, 0) & size;
-    int  total = dustList.length;
+    int total = dustList.length;
     for (var model in dustList) {
       int index = dustList.indexOf(model);
       double realStep = step;
-      if((index / total) > 0.125 + step) {
+      if ((index / total) > 0.125 + step) {
         realStep = 0;
       }
       ui.Image image = model.image;
@@ -193,7 +221,7 @@ class _DustEffectPainter extends CustomPainter {
       canvas.translate((p0.x - px.x) / 2, (p0.y - px.y) / 2);
       // 后旋转
       canvas.rotate(xAngle);
-      canvas.drawImageRect(image, src, rect, Paint());
+      canvas.drawImageRect(image, src, rect, mPaint);
       canvas.restore();
     }
   }
@@ -206,112 +234,7 @@ class _DustEffectPainter extends CustomPainter {
         return true;
       }
     }
-    return true;
+    return false;
   }
 }
-
-const int bitmapPixelLength = 4;
-const int RGBA32HeaderSize = 122;
-
-class Bitmap {
-  Bitmap.fromHeadless(this.width, this.height, this.content);
-
-  Bitmap.fromHeadful(this.width, this.height, Uint8List headedIntList)
-      : content = headedIntList.sublist(
-          RGBA32HeaderSize,
-          headedIntList.length,
-        );
-
-  Bitmap.blank(
-    this.width,
-    this.height,
-  ) : content = Uint8List.fromList(
-          List.filled(width * height * bitmapPixelLength, 0),
-        );
-
-  final int width;
-  final int height;
-  final Uint8List content;
-
-  int get size => (width * height) * bitmapPixelLength;
-
-  Bitmap cloneHeadless() {
-    return Bitmap.fromHeadless(
-      width,
-      height,
-      Uint8List.fromList(content),
-    );
-  }
-
-  static Future<Bitmap> fromProvider(ImageProvider provider) async {
-    final Completer completer = Completer<ImageInfo>();
-    final ImageStream stream = provider.resolve(const ImageConfiguration());
-    final listener =
-        ImageStreamListener((ImageInfo info, bool synchronousCall) {
-      if (!completer.isCompleted) {
-        completer.complete(info);
-      }
-    });
-    stream.addListener(listener);
-    final imageInfo = await completer.future;
-    final ui.Image image = imageInfo.image;
-    final ByteData byteData = await image.toByteData();
-    final Uint8List listInt = byteData.buffer.asUint8List();
-
-    return Bitmap.fromHeadless(image.width, image.height, listInt);
-  }
-
-  Future<ui.Image> buildImage() async {
-    final Completer<ui.Image> imageCompleter = Completer();
-    final headedContent = buildHeaded();
-    ui.decodeImageFromList(headedContent, (ui.Image img) {
-      imageCompleter.complete(img);
-    });
-    return imageCompleter.future;
-  }
-
-  Uint8List buildHeaded() {
-    final header = RGBA32BitmapHeader(size, width, height)
-      ..applyContent(content);
-    return header.headerIntList;
-  }
-}
-
-class RGBA32BitmapHeader {
-  RGBA32BitmapHeader(this.contentSize, int width, int height) {
-    headerIntList = Uint8List(fileLength);
-
-    final ByteData bd = headerIntList.buffer.asByteData();
-    bd.setUint8(0x0, 0x42);
-    bd.setUint8(0x1, 0x4d);
-    bd.setInt32(0x2, fileLength, Endian.little);
-    bd.setInt32(0xa, RGBA32HeaderSize, Endian.little);
-    bd.setUint32(0xe, 108, Endian.little);
-    bd.setUint32(0x12, width, Endian.little);
-    bd.setUint32(0x16, -height, Endian.little);
-    bd.setUint16(0x1a, 1, Endian.little);
-    bd.setUint32(0x1c, 32, Endian.little); // pixel size
-    bd.setUint32(0x1e, 3, Endian.little); //BI_BITFIELDS
-    bd.setUint32(0x22, contentSize, Endian.little);
-    bd.setUint32(0x36, 0x000000ff, Endian.little);
-    bd.setUint32(0x3a, 0x0000ff00, Endian.little);
-    bd.setUint32(0x3e, 0x00ff0000, Endian.little);
-    bd.setUint32(0x42, 0xff000000, Endian.little);
-  }
-
-  int contentSize;
-
-  void applyContent(Uint8List contentIntList) {
-    headerIntList.setRange(
-      RGBA32HeaderSize,
-      fileLength,
-      contentIntList,
-    );
-  }
-
-  Uint8List headerIntList;
-
-  int get fileLength => contentSize + RGBA32HeaderSize;
-}
-
 

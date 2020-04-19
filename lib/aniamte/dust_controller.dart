@@ -2,16 +2,16 @@ import 'package:flutter/cupertino.dart';
 
 class DustValue {
   final bool showDustImage;
-  final bool showDustAnimation;
+  final bool animationToSnap;
 
   const DustValue({
     this.showDustImage,
-    this.showDustAnimation,
+    this.animationToSnap,
   });
 
   static const DustValue empty = DustValue(
     showDustImage: false,
-    showDustAnimation: false,
+    animationToSnap: false,
   );
 
   DustValue copyWith({
@@ -20,7 +20,7 @@ class DustValue {
   }) {
     return DustValue(
       showDustImage: showDustImage ?? this.showDustImage,
-      showDustAnimation: showDustAnimation ?? this.showDustAnimation,
+      animationToSnap: showDustAnimation ?? this.animationToSnap,
     );
   }
 }
@@ -29,18 +29,23 @@ class DustController extends ValueNotifier<DustValue> {
   DustController({bool showDust, bool showDustAnimation = false})
       : super(showDust == null
             ? DustValue.empty
-            : DustValue(showDustImage: showDust, showDustAnimation: showDustAnimation));
+            : DustValue(showDustImage: showDust, animationToSnap: showDustAnimation));
 
   void showDust() {
-    value = DustValue(showDustImage: true, showDustAnimation: false);
+    value = DustValue(showDustImage: true, animationToSnap: false);
   }
 
   void hiddenDust() {
-    value = DustValue(showDustImage: false, showDustAnimation: true);
+    value = DustValue(showDustImage: false, animationToSnap: false);
   }
 
   void startDustAnimation() {
     //value = value.copyWith(showDustAnimation: true);
-    value = DustValue(showDustImage: true, showDustAnimation: true);
+    value = DustValue(showDustImage: true, animationToSnap: true);
+  }
+
+  void reverseDustAnimation() {
+    //value = value.copyWith(showDustAnimation: true);
+    value = DustValue(showDustImage: true, animationToSnap: false);
   }
 }

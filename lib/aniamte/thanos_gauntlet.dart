@@ -41,6 +41,7 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
   void initState() {
     super.initState();
     _player = AudioCache();
+    _player.disableLog();
     _loadImage();
   }
 

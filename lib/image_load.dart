@@ -11,7 +11,6 @@ class ImageLoader {
     ImageProvider provider, {
     ImageConfiguration config = ImageConfiguration.empty,
   }) async {
-    print('Load image! ____#');
     Completer<ui.Image> completer = Completer<ui.Image>(); //完成的回调
     ImageStreamListener listener;
     ImageStream stream = provider.resolve(config); //获取图片流
@@ -26,7 +25,7 @@ class ImageLoader {
   }
 
 
-  //通过[Uint8List]获取图片,默认宽高[width][height]
+  // 通过 Uint8List获取图片, 默认宽高 [width][height]
   Future<ui.Image> loadImageByUint8List(
       Uint8List list, {
         int width,
@@ -44,5 +43,4 @@ class ImageLoader {
     });
     return completer.future;
   }
-
 }
