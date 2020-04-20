@@ -69,13 +69,15 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
     ByteData byteData = await originImg.toByteData();
     Uint8List originList = new Uint8List.view(byteData.buffer);
     int length = originList.length;
-    // ARGB信息
+    // RGBA信息
     List<Uint8List> framePixels = new List(imageCount);
     for (int i = 0; i < imageCount; i++) {
       framePixels[i] = Uint8List(length);
     }
     // 遍历 originList
     for (int idx = 0; idx < length; idx++) {
+      // Uint8List 每个存储一个 0~255的数字表示 `R`,`G`, `B`, `A` 中的一个值
+      // 从 index = 0 开始每 4 位表示一个像素的`RGBA`信息
       if (idx % 4 == 0 && idx > 3) {
         double column = (idx / 4) % imageWidth;
         // 每个循环2次
@@ -202,7 +204,9 @@ class _DustEffectPainter extends CustomPainter {
     double miniScale = delay / length;
     for (var model in dustList) {
       int index = dustList.indexOf(model);
+      // 根据 index 和 传入的 value 来计算 index 对应的 image 的动画进程
       double indexStart = value - (miniScale * index);
+      // 边界值处理
       indexStart = indexStart > 0
           ? (indexStart < duration ? indexStart : duration.toDouble())
           : 0.0;
