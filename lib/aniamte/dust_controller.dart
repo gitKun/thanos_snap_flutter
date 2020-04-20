@@ -29,7 +29,8 @@ class DustController extends ValueNotifier<DustValue> {
   DustController({bool showDust, bool showDustAnimation = false})
       : super(showDust == null
             ? DustValue.empty
-            : DustValue(showDustImage: showDust, animationToSnap: showDustAnimation));
+            : DustValue(
+                showDustImage: showDust, animationToSnap: showDustAnimation));
 
   void showDust() {
     value = DustValue(showDustImage: true, animationToSnap: false);

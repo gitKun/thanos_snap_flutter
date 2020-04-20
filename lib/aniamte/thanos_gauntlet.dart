@@ -174,8 +174,8 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
       !showSnap ? ThanosGauntletAction.snap : ThanosGauntletAction.reverse,
     );
 
-    if(showSnap) {
-      Future.delayed(Duration(seconds: 0, milliseconds: 650),(){
+    if (showSnap) {
+      Future.delayed(Duration(seconds: 0, milliseconds: 650), () {
         _player.play('thanos_reverse_sound.mp3');
       });
     } else {

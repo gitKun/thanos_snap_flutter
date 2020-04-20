@@ -37,7 +37,6 @@ class _TestDustDrawDemoState extends State<TestDustDrawDemo>
   @override
   Widget build(BuildContext context) {
     return Container(
-
       alignment: Alignment.center,
       child: _drawImage(),
     );

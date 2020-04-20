@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
       body: ListView(
         children: <Widget>[
           Padding(padding: EdgeInsets.only(top: 80)),
-
           Container(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -98,7 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          TestDustDrawDemo(),
         ],
       ),
       floatingActionButton: ThanosGauntlet(

@@ -7,8 +7,7 @@ class ImageLoader {
   ImageLoader._(); // 私有化构造器
   static final ImageLoader loader = ImageLoader._();
 
-  Future<ui.Image> loadImageByProvider(
-    ImageProvider provider, {
+  Future<ui.Image> loadImageByProvider(ImageProvider provider, {
     ImageConfiguration config = ImageConfiguration.empty,
   }) async {
     Completer<ui.Image> completer = Completer<ui.Image>(); //完成的回调
@@ -26,11 +25,10 @@ class ImageLoader {
 
 
   // 通过 Uint8List获取图片, 默认宽高 [width][height]
-  Future<ui.Image> loadImageByUint8List(
-      Uint8List list, {
-        int width,
-        int height,
-      }) async {
+  Future<ui.Image> loadImageByUint8List(Uint8List list, {
+    int width,
+    int height,
+  }) async {
     /*
     ui.Codec codec = await ui.instantiateImageCodec(list,
         targetWidth: width, targetHeight: height);

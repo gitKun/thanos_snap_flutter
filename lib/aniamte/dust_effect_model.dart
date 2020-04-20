@@ -1,14 +1,13 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-
 class DustEffectModel {
   ui.Image image;
 
   DustEffectModel(this.image);
 
   Point get translate {
-    if(_translate != null) {
+    if (_translate != null) {
       return _translate;
     }
     double radian1 = pi / 12 * (Random().nextDouble() - 0.5);
@@ -20,6 +19,7 @@ class DustEffectModel {
     _translate = Point(realTransX, realTransY);
     return _translate;
   }
+
   double get rotation => _rotation;
 
   Point _translate;

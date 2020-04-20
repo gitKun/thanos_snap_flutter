@@ -56,7 +56,7 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     }
     setState(() {
       _showDust = widget.dustController.value.showDustImage;
-      if(!_showDust) {
+      if (!_showDust) {
         _controller.reset();
       }
     });
@@ -66,8 +66,7 @@ class _DustEffectContainerState extends State<DustEffectContainer>
         _controller.reset();
         _controller.forward();
       });
-    } else if(!widget.dustController.value.animationToSnap &&
-        _realShowDust) {
+    } else if (!widget.dustController.value.animationToSnap && _realShowDust) {
       setState(() {
         _controller.reverse();
       });
@@ -103,7 +102,6 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     return Container(
       child: Stack(
         children: [
-
           Opacity(
             opacity: _realShowDust ? 0 : 1,
             child: RepaintBoundary(

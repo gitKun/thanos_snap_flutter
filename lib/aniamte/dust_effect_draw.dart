@@ -114,8 +114,7 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
   /// 初始化动画
   _initAnimation() {
     _animation =
-        IntTween(begin: 0, end: _totalTime).animate(widget
-            .animationController)
+        IntTween(begin: 0, end: _totalTime).animate(widget.animationController)
           ..addListener(_handleAnimationChange)
           ..addStatusListener(_handleAnimationStatusChange);
   }
@@ -204,9 +203,9 @@ class _DustEffectPainter extends CustomPainter {
     for (var model in dustList) {
       int index = dustList.indexOf(model);
       double indexStart = value - (miniScale * index);
-      indexStart =
-          indexStart > 0 ? (indexStart < duration ? indexStart : duration.toDouble())
-              : 0.0;
+      indexStart = indexStart > 0
+          ? (indexStart < duration ? indexStart : duration.toDouble())
+          : 0.0;
       double showScale = indexStart / duration;
 
       ui.Image image = model.image;
