@@ -37,8 +37,7 @@ class _TestDustDrawDemoState extends State<TestDustDrawDemo>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 80,
-      width: 80,
+
       alignment: Alignment.center,
       child: _drawImage(),
     );
@@ -49,12 +48,40 @@ class _TestDustDrawDemoState extends State<TestDustDrawDemo>
       return Container();
     }
     return Container(
-
-      child: DustEffectDraw(
-        image: _image,
-        animationController: _controller,
-        rebuildHeader: true,
+      width: 40,
+      height: 40,
+      child: CustomPaint(
+        painter: _AlphaPainter(placeholderImage: _image),
       ),
     );
+  }
+}
+
+class _AlphaPainter extends CustomPainter {
+  Paint mPaint;
+  ui.Image placeholderImage;
+
+  _AlphaPainter({@required this.placeholderImage}) {
+    mPaint = Paint();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect rect = Offset(0, 0) & size;
+    ui.Image image = placeholderImage;
+    Rect src = Rect.fromLTRB(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+    print("Draw alpha image!");
+    mPaint.color = Color.fromRGBO(0, 0, 0, 0.5);
+    canvas.drawImageRect(image, src, rect, mPaint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

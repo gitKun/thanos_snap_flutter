@@ -29,7 +29,7 @@ class _DustEffectContainerState extends State<DustEffectContainer>
     super.initState();
     widget.dustController.addListener(_didChangeDustValue);
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 3, milliseconds: 350),
       vsync: this,
     );
   }

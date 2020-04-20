@@ -118,7 +118,15 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
       ..addStatusListener(_handleAnimationStatus);
 
     reverseController = AnimationController(
-      duration: Duration(seconds: 2),
+      /*
+       * 这里不应该是 3.35s 的动画时长,应该改为 2s ,如若改为 2s 请务必:
+       * 1. 对应添加 dust_effect_draw.dart 中的  `_handleAnimationStatusChange`;
+       * 2. 在 dust_controller.dart 中添加 reverse 动画参数;
+       * 3. 在 main.dart 中的 `onAnimationComplete` 和 `onPressed`
+       *    按照`ThanosGauntletAction.snap` 的样式添加`reverse`代码;
+       * 4. 删除本文件中 if(showSnap) { Future.delayed...} 并打开 下面被注释的代码
+      */
+      duration: Duration(seconds: 3, milliseconds: 350),
       vsync: this,
     );
     reverseAnimation = IntTween(
@@ -166,8 +174,17 @@ class _ThanosGauntletState extends State<ThanosGauntlet>
       !showSnap ? ThanosGauntletAction.snap : ThanosGauntletAction.reverse,
     );
 
+    if(showSnap) {
+      Future.delayed(Duration(seconds: 0, milliseconds: 650),(){
+        _player.play('thanos_reverse_sound.mp3');
+      });
+    } else {
+      _player.play('thanos_snap_sound.mp3');
+    }
+    /*
     _player.play(
       !showSnap ? 'thanos_snap_sound.mp3' : 'thanos_reverse_sound.mp3',
     );
+    */
   }
 }

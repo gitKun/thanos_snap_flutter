@@ -98,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+          TestDustDrawDemo(),
         ],
       ),
       floatingActionButton: ThanosGauntlet(

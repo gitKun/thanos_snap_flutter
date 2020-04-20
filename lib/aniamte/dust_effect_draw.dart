@@ -34,6 +34,12 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
 
   ui.Image _image;
 
+  int get _totalTime => _duration + _delay;
+
+  int get _duration => 200;
+
+  int get _delay => 200;
+
   @override
   void initState() {
     super.initState();
@@ -59,7 +65,6 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
   /// 拆解图像
   _initImages(ui.Image image) async {
     ui.Image originImg = image;
-    int imageHeight = originImg.height;
     int imageWidth = originImg.width;
     ByteData byteData = await originImg.toByteData();
     Uint8List originList = new Uint8List.view(byteData.buffer);
@@ -108,9 +113,11 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
 
   /// 初始化动画
   _initAnimation() {
-    _animation = IntTween(begin: 0, end: 10).animate(widget.animationController)
-      ..addListener(_handleAnimationChange)
-      ..addStatusListener(_handleAnimationStatusChange);
+    _animation =
+        IntTween(begin: 0, end: _totalTime).animate(widget
+            .animationController)
+          ..addListener(_handleAnimationChange)
+          ..addStatusListener(_handleAnimationStatusChange);
   }
 
   _handleAnimationChange() {
@@ -128,12 +135,13 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
   @override
   Widget build(BuildContext context) {
     if (dustModelList != null) {
-      return Opacity(
-        opacity: 1 - _animation.value / 10.0,
+      return Container(
         child: CustomPaint(
           painter: _DustEffectPainter(
             dustList: dustModelList,
-            step: _animation.value / 10.0,
+            value: _animation.value,
+            duration: _duration,
+            delay: _delay,
           ),
         ),
       );
@@ -148,6 +156,7 @@ class _DustEffectDrawState extends State<DustEffectDraw> {
 class _DustEffectPlaceholderPainter extends CustomPainter {
   Paint mPaint;
   ui.Image placeholderImage;
+
   _DustEffectPlaceholderPainter({@required this.placeholderImage}) {
     mPaint = Paint();
   }
@@ -169,28 +178,37 @@ class _DustEffectPlaceholderPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }
-
 }
 
 class _DustEffectPainter extends CustomPainter {
   Paint mPaint;
-  double step;
+  int value;
+  int duration;
+  int delay;
   List<DustEffectModel> dustList;
 
-  _DustEffectPainter({@required this.dustList, this.step}) {
+  _DustEffectPainter({
+    @required this.dustList,
+    @required this.value,
+    @required this.duration,
+    @required this.delay,
+  }) {
     mPaint = Paint();
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     Rect rect = Offset(0, 0) & size;
-    int total = dustList.length;
+    int length = dustList.length;
+    double miniScale = delay / length;
     for (var model in dustList) {
       int index = dustList.indexOf(model);
-      double realStep = step;
-      if ((index / total) > 0.125 + step) {
-        realStep = 0;
-      }
+      double indexStart = value - (miniScale * index);
+      indexStart =
+          indexStart > 0 ? (indexStart < duration ? indexStart : duration.toDouble())
+              : 0.0;
+      double showScale = indexStart / duration;
+
       ui.Image image = model.image;
       Rect src = Rect.fromLTRB(
         0,
@@ -198,7 +216,7 @@ class _DustEffectPainter extends CustomPainter {
         image.width.toDouble(),
         image.height.toDouble(),
       );
-      double rotation = model.rotation * realStep;
+      double rotation = model.rotation * showScale;
       Point translate = model.translate;
       canvas.save();
       // 计算画布中心轨迹圆半径
@@ -214,13 +232,15 @@ class _DustEffectPainter extends CustomPainter {
       double xAngle = rotation;
       // 计算旋转后的画布中心点坐标
       Point px = Point(
-        r * cos(xAngle + startAngle) - translate.x * realStep,
-        r * sin(xAngle + startAngle) - translate.y * realStep,
+        r * cos(xAngle + startAngle) - translate.x * showScale,
+        r * sin(xAngle + startAngle) - translate.y * showScale,
       );
       // 先平移画布
       canvas.translate((p0.x - px.x) / 2, (p0.y - px.y) / 2);
       // 后旋转
       canvas.rotate(xAngle);
+      // 设置透明度
+      mPaint.color = Color.fromRGBO(0, 0, 0, (1.0 - showScale));
       canvas.drawImageRect(image, src, rect, mPaint);
       canvas.restore();
     }
@@ -230,11 +250,11 @@ class _DustEffectPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     if (oldDelegate is _DustEffectPainter) {
       _DustEffectPainter oldPainter = oldDelegate;
-      if (oldPainter.step != this.step || oldPainter.mPaint != this.mPaint) {
+      if ((oldPainter.value != this.value) ||
+          (oldPainter.mPaint != this.mPaint)) {
         return true;
       }
     }
     return false;
   }
 }
-
