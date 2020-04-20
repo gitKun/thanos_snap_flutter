@@ -216,7 +216,7 @@ class _DustEffectPainter extends CustomPainter {
         image.height.toDouble(),
       );
       double rotation = model.rotation * showScale;
-      Point translate = model.translate;
+      Point translate = model.currentPoint(showScale);
       canvas.save();
       // 计算画布中心轨迹圆半径
       double r = sqrt(pow(size.width, 2) + pow(size.height, 2));
@@ -231,8 +231,8 @@ class _DustEffectPainter extends CustomPainter {
       double xAngle = rotation;
       // 计算旋转后的画布中心点坐标
       Point px = Point(
-        r * cos(xAngle + startAngle) - translate.x * showScale,
-        r * sin(xAngle + startAngle) - translate.y * showScale,
+        r * cos(xAngle + startAngle) - translate.x,
+        r * sin(xAngle + startAngle) - translate.y,
       );
       // 先平移画布
       canvas.translate((p0.x - px.x) / 2, (p0.y - px.y) / 2);
